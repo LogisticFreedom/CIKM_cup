@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 
 def praser(line):
-#
+
     id = line[:, 0][0]
     label = line[:, 1][0]
     rawImg = np.array(list(map(np.int, line[:, 2][0].split(" "))))

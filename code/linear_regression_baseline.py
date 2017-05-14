@@ -35,7 +35,7 @@ linearModel.add(Dense(units=1, input_dim=612060)) # 线性回归
 #linearModel = Model(inputs=inputImg, outputs=preds)
 preds = linearModel(inputImg)
 
-loss = tf.reduce_mean(mean_squared_error(trainy, preds))
+loss = tf.reduce_mean(tf.pow(trainy-preds, 2), axis=0)
 
 train_step = tf.train.GradientDescentOptimizer(0.01).minimize(loss)
 
@@ -66,7 +66,7 @@ with tf.Session() as sess:
         print(imgArr.shape)
         preds = linearModel(testImg)
         predsArr = sess.run(preds)
-        print(predsArr.shape)
+        print(predsArr)
         predList.extend(predsArr)
 
     a = [j for i in predList for j in i] # 展平list

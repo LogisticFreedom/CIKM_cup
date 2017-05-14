@@ -11,6 +11,8 @@ epoch = 10
 batchSize = 32
 
 trainx, trainy = inputBatch("../data/train.tfrecords", batchSize)
+trainy = tf.log1p(trainy) # log平滑
+
 
 cnn = Conv3DModel()
 network = cnn.inference(trainx, batchSize)

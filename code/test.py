@@ -1,6 +1,7 @@
 import tensorlayer as tl
 import tensorflow as tf
 import pandas as pd
+import numpy as np
 from code.read_data import inputNoShuffle
 from code.CNNModel import Conv3DModel
 
@@ -28,6 +29,7 @@ with tf.Session() as sess:
         testArr = sess.run(testx)
         print(testArr.shape)
         predArr = sess.run(preds)
+        predArr = np.expm1(predArr) # exp数据还原
         predList.extend(predArr)
 
     a = [j for i in predList for j in i]  # 展平list

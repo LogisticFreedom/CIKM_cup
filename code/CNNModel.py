@@ -27,7 +27,7 @@ class BaseModel():
 class Conv2DModel():
 
     def inference(self, x):
-        conv1 = tl.layers.Conv2d(x, filter_size=(3, 3), strides=(1,1))
+        conv1 = tl.layers.Conv2d(x, filter_size=(3, 3), strides=(1, 1))
         maxpool1 = tl.layers.PoolLayer(conv1, pool=tf.nn.max_pool)
 
         output = maxpool1

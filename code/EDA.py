@@ -37,7 +37,8 @@ import matplotlib.pyplot as plt
 
 
 file = "../data/label_count.csv"
-df = pd.read_csv(file)
-df = np.log1p(df)
+ansfile = "../result/result_linear_model.csv"
+df = pd.read_csv(ansfile)
+#df = np.log1p(df)
 df.hist(bins=20)
 plt.show()

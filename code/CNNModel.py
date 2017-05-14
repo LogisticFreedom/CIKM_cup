@@ -33,7 +33,6 @@ class Conv2DModel():
         output = maxpool1
         return output
 
-
 class Conv3DModel():
 
     def inference(self, x, batchSize, trainFlag = True):
@@ -65,8 +64,6 @@ class Conv3DModel():
         network = tl.layers.DenseLayer(network, n_units=128, act=tf.nn.relu, name="fc2")
         network = tl.layers.DropoutLayer(network, keep=0.6, is_train=trainFlag, is_fix=True)
         output = tl.layers.DenseLayer(network, n_units=1, act=tf.nn.relu)
-
-        output = output.outputs
 
         return output
 

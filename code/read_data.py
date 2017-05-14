@@ -1,53 +1,15 @@
 import numpy as np
 import pandas as pd
 import tensorflow as tf
-from PIL import Image
-
-# def processLine(chunk, batchSize):
-#
-#     print(chunk.shape)
-#     id = chunk[:, 0]
-#     label = chunk[:, 1]
-#     x = []
-#     for i in range(batchSize):
-#         x.append(chunk[i, 2].split(" "))
-#     # rawImg = np.array(list(map(str.split(" "), list(chunk[:, 2]))))
-#     # print(rawImg)
-#     rawImg =np.array(x).astype(np.int)
-#     print(rawImg)
-#     imgSeq = rawImg.reshape((batchSize, 15, 4, 101, 101))
-#     #print(imgSeq.shape)
-#     return imgSeq, label
-
-
-
-# def generate_arrays_from_file(filePath, batch_size):
-#
-#     dataReader = pd.read_csv(filePath, delimiter=",", iterator=True)
-#
-#     loop = True
-#     while loop:
-#         try:
-#             chunk = dataReader.get_chunk(batch_size)
-#             x, y = processLine(chunk.values, batch_size)
-#
-#             yield (x, y)
-#
-#         except StopIteration:
-#             loop = False
-#             print("Iteration is stopped.")
-
-
+import matplotlib.pyplot as plt
 
 def inputData(fileNameQue, trainFlag = True):
+
     '''
     :param fileNameQue: 文件名队列
-    :param size: 图片尺寸
     :param trainFlag: 读取的是否是训练集
     :return: 训练集返回图像和标签，测试集返回图像
     '''
-
-    #fileNameQue = tf.train.string_input_producer(["./data/faceTF.tfrecords"])
 
     # 创建tfrecorder阅读器
     reader = tf.TFRecordReader()
@@ -77,7 +39,6 @@ def inputBatch(filename, batchSize, dequeue=50):
 
     :param filename: 文件名
     :param batchSize: batch大小
-    :param imgSize: 图像尺寸
     :param dequeue: 缓冲队列大小
     :return: 图像batch，标签batch
     '''
@@ -93,31 +54,36 @@ def inputBatch(filename, batchSize, dequeue=50):
 
 def inputNoShuffle(filename, batchSize):
     '''
-
+    顺序输出测试集数据
     :param filename: 文件名
-    :param imgSize: 图像大小
+    :param batchSize: 批量大小
     :return: 图像
     '''
     fileNameQue = tf.train.string_input_producer([filename], shuffle=False)
-    #min_after_dequeue = dequeue
-    #capacity = min_after_dequeue + 3 * batchSize
     example = inputData(fileNameQue, trainFlag=False)
     exampleBatch = tf.train.batch([example], batchSize, allow_smaller_final_batch=True)
     return exampleBatch
 
-
+def inputNoShuffleTrain(filename, batchSize):
+    '''
+    顺序输出训练集数据，包含label
+    :param filename: 文件名
+    :param batchSize: 批量大小
+    :return: 图像，label
+    '''
+    fileNameQue = tf.train.string_input_producer([filename], shuffle=False)
+    example, label = inputData(fileNameQue, trainFlag=True)
+    exampleBatch, labelBatch = tf.train.batch([example, label], batchSize, allow_smaller_final_batch=True)
+    return exampleBatch, labelBatch
 
 
 if __name__ == "__main__":
 
     with tf.Session() as sess:
 
-        # 逐一产生test样本
-        fileNameQue = tf.train.string_input_producer(["../data/train.tfrecords"])
-        testimg = inputData(fileNameQue, trainFlag=False)
-
         # 产生训练样本
-        imgBatch, labelBatch = inputBatch("../data/train.tfrecords", 32)
+        #imgBatch, labelBatch = inputBatch("../data/train.tfrecords", 32)
+        imgBatch, labelBatch = inputNoShuffleTrain("../data/train.tfrecords", 100)
 
         # 初始化
         init = tf.global_variables_initializer()
@@ -126,14 +92,23 @@ if __name__ == "__main__":
         coord = tf.train.Coordinator()
         threads = tf.train.start_queue_runners(coord=coord)
 
-        for i in range(10):
+        labelList = []
+        for i in range(20):
             imgArr = sess.run(imgBatch)
             labelArr = sess.run(labelBatch)
-            testImgArr = sess.run(testimg)
+            print(labelArr.shape)
+            labelList.extend(labelArr)
+
+            #testImgArr = sess.run(testimg)
             #print(imgArr.shape, labelArr)
-            print(testimg.shape)
-            #im = Image.fromarray(np.uint8(imgArr))
-            # im.save("./data/img.jpg")
+            #print(testimg.shape)
+
+        labelList = [j for i in labelList for j in i]
+        labelDF = pd.Series(labelList)
+        labelDF.hist()
+        plt.show()
+
+        labelDF.to_csv("../data/label_count.csv", index=False)
 
         coord.request_stop()
         coord.join(threads)

@@ -1,13 +1,14 @@
 import pandas as pd
 import keras as K
 import  numpy as np
+import matplotlib.pyplot as plt
 
 
 
-filePath = "../data/CIKM2017_testA/data_new/CIKM2017_testA/testA.txt"
-dataReader = pd.read_csv(filePath, delimiter=",", iterator=True)
-data = dataReader.get_chunk(1)
-print(data.values[:, 1])
+# filePath = "../data/CIKM2017_testA/data_new/CIKM2017_testA/testA.txt"
+# dataReader = pd.read_csv(filePath, delimiter=",", iterator=True)
+# data = dataReader.get_chunk(1)
+# print(data.values[:, 1])
 #print(len(list((data.values[:, 2][0].split(" ")))))
 #print(len(data.values[]))
 
@@ -33,3 +34,10 @@ print(data.values[:, 1])
 # if __name__ == "__main__":
 #     filePath = "../data/CIKM2017_train/data_new/CIKM2017_train/data_sample.txt"
 #     cleanData(filePath)
+
+
+file = "../data/label_count.csv"
+df = pd.read_csv(file)
+df = np.log1p(df)
+df.hist(bins=20)
+plt.show()

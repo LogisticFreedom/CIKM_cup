@@ -38,32 +38,33 @@ class Conv3DModel():
 
     def inference(self, x, batchSize, trainFlag = True):
 
-        # x = Input(shape=(15, 101, 101, 4), name='image_input')
         x = tf.nn.l2_normalize(x, dim=1)  # 标准化
+
         x = tf.reshape(x, [batchSize, 15, 4, 101, 101])
         x = tf.transpose(x, [0, 1, 3, 4, 2])
 
         inputx = tl.layers.InputLayer(x, name='input_layer')
-        conv1 = tl.layers.Conv3dLayer(inputx, act=tf.nn.relu, shape=[3, 3, 3, 4, 32], name="conv1")
-        maxpoll1 = tl.layers.MaxPool3d(conv1, filter_size=[2, 2, 2], strides=[1, 1, 1], data_format="channels_last", name="maxpool1")
 
-        conv2 = tl.layers.Conv3dLayer(maxpoll1, act=tf.nn.relu, shape=[3, 3, 3, 32, 64], name="conv2")
-        maxpoll2 = tl.layers.MaxPool3d(conv2, filter_size=[2, 2, 2], strides=[ 1, 1, 1],
+        network = tl.layers.Conv3dLayer(inputx, act=tf.nn.relu, shape=[3, 3, 3, 4, 32], name="conv1")
+        network = tl.layers.MaxPool3d(network, filter_size=[2, 2, 2], strides=[1, 1, 1], data_format="channels_last", name="maxpool1")
+
+        network = tl.layers.Conv3dLayer(network, act=tf.nn.relu, shape=[3, 3, 3, 32, 64], name="conv2")
+        network = tl.layers.MaxPool3d(network, filter_size=[2, 2, 2], strides=[ 1, 1, 1],
                                        data_format="channels_last", name="maxpool2")
 
-        conv3 = tl.layers.Conv3dLayer(maxpoll2, act=tf.nn.relu, shape=[3, 3, 3, 64, 128], name="conv3")
-        maxpoll3 = tl.layers.MaxPool3d(conv3, filter_size=[2, 2, 2], strides=[ 1, 1, 1],
+        network = tl.layers.Conv3dLayer(network, act=tf.nn.relu, shape=[3, 3, 3, 64, 128], name="conv3")
+        network = tl.layers.MaxPool3d(network, filter_size=[2, 2, 2], strides=[ 1, 1, 1],
                                        data_format="channels_last", name="maxpool3")
 
-        # conv4 = tl.layers.Conv3dLayer(maxpoll3, act=tf.nn.relu, shape=[3, 3, 3, 128, 256], name="conv4")
-        # maxpoll4 = tl.layers.MaxPool3d(conv4, filter_size=[2, 2, 2], strides=[1, 1, 1],
+        # network = tl.layers.Conv3dLayer(network, act=tf.nn.relu, shape=[3, 3, 3, 128, 256], name="conv4")
+        # network = tl.layers.MaxPool3d(network, filter_size=[2, 2, 2], strides=[1, 1, 1],
         #                                data_format="channels_last", name="maxpool4")
 
-        flatten = tl.layers.FlattenLayer(maxpoll3)
-        fc1 = tl.layers.DenseLayer(flatten, n_units=256, act=tf.nn.relu, name="fc1")
-        fc2 = tl.layers.DenseLayer(fc1, n_units=128, act=tf.nn.relu, name="fc2")
-        fc1_drop = tl.layers.DropoutLayer(fc2, keep=0.6, is_train=trainFlag)
-        output = tl.layers.DenseLayer(fc1_drop, n_units=1, act=tf.nn.relu)
+        network = tl.layers.FlattenLayer(network)
+        network = tl.layers.DenseLayer(network, n_units=256, act=tf.nn.relu, name="fc1")
+        network = tl.layers.DenseLayer(network, n_units=128, act=tf.nn.relu, name="fc2")
+        network = tl.layers.DropoutLayer(network, keep=0.6, is_train=trainFlag, is_fix=True)
+        output = tl.layers.DenseLayer(network, n_units=1, act=tf.nn.relu)
 
         output = output.outputs
 

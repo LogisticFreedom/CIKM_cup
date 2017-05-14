@@ -39,9 +39,10 @@ loss = tf.reduce_mean(tf.pow(trainy-preds, 2), axis=0)
 
 train_step = tf.train.GradientDescentOptimizer(0.01).minimize(loss)
 
-testImg = inputNoShuffle("../data/train.tfrecords", 20)
+testx = inputNoShuffle("../data/train.tfrecords", 20)
+testx = tf.nn.l2_normalize(testx, dim=1)
 
-predTest = linearModel(testImg)
+predTest = linearModel(testx)
 
 with tf.Session() as sess:
     init = tf.global_variables_initializer()
@@ -62,9 +63,9 @@ with tf.Session() as sess:
     testNum = 100
     predList = []
     for i in range(testNum):
-        imgArr = sess.run(testImg)
+        imgArr = sess.run(testx)
         print(imgArr.shape)
-        preds = linearModel(testImg)
+        preds = linearModel(testx)
         predsArr = sess.run(preds)
         print(predsArr)
         predList.extend(predsArr)
